@@ -4,7 +4,6 @@ import {
   analyzeVideo,
   getExerciseState,
   resetSession,
-  isDemoActive,
   type ExerciseStateInfo,
   type FrameAnalysis,
   type VideoAnalysisResult,
@@ -27,7 +26,6 @@ export default function App() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [liveMode, setLiveMode] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const captureTimer = useRef<number | null>(null);
@@ -36,7 +34,6 @@ export default function App() {
     getExerciseState()
       .then((s) => {
         setStateInfo(s);
-        setDemoMode(false);
       })
       .catch(() => {});
     return () => stopLive();
@@ -77,7 +74,6 @@ export default function App() {
           try {
             const result = await analyzeFrame(file);
             setFrame(result);
-            setDemoMode(isDemoActive());
           } catch {
             /* transient */
           }
@@ -96,7 +92,6 @@ export default function App() {
     try {
       const result = await analyzeFrame(file);
       setFrame(result);
-      setDemoMode(isDemoActive());
     } catch {
       setError("Frame analysis failed. Is the backend running?");
     } finally {
@@ -112,7 +107,6 @@ export default function App() {
     try {
       const result = await analyzeVideo(file);
       setVideoResult(result);
-      setDemoMode(isDemoActive());
     } catch {
       setError("Video analysis failed. Is the backend running?");
     } finally {
@@ -153,12 +147,6 @@ export default function App() {
       </section>
 
       {error && <div className="error">{error}</div>}
-      {demoMode && (
-        <div className="demo-banner">
-          ⚡ Demo mode — the live FastAPI backend is not connected. Showing sample
-          analysis data. Run the backend locally for real pose estimation.
-        </div>
-      )}
       {processing && <div className="processing">Processing…</div>}
 
       <div className="grid">
